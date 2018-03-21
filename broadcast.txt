@@ -1,0 +1,73 @@
+BroadcastExample.java
+=====================
+
+package com.example.prj15;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
+import android.util.Log;
+import android.widget.Toast;
+
+public class BroadcastExample extends BroadcastReceiver {
+	final SmsManager sms=SmsManager.getDefault();
+
+	@Override
+	public void onReceive(Context arg0, Intent arg1) {
+		final Bundle bu=arg1.getExtras();
+		try{
+			if(bu !=null){
+				final Object[] pdusObj=(Object[])bu.get("pdus");
+				for(int i=0;i < pdusObj.length;i++){
+					SmsMessage currentMessage=SmsMessage.createFromPdu((byte[])pdusObj[i]);
+					String phoneNumber=currentMessage.getDisplayOriginatingAddress();
+					String senderNum=phoneNumber;
+					String message=currentMessage.getDisplayMessageBody();
+					Toast.makeText(arg0,"senderNum:"+senderNum+"message:"+message,Toast.LENGTH_LONG).show();
+				}
+			}
+		}catch(Exception e){
+			Log.e("SmsReceiver","Exception smsReceiver"+e);
+		}
+		
+	}
+		
+}
+
+
+maifest
+=======
+
+ <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.example.prj15.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver android:name=".BroadcastExample">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
+
+
+MainActivity.java
+================
